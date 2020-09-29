@@ -1,0 +1,106 @@
+version: 2.1
+
+commands:
+  print_pipeline_id:
+    steps:
+      - run: echo ${CIRCLE_WORKFLOW_ID}
+
+jobs:
+  print_hello:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - run: echo "hello"
+  print_world:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - run: echo "world"
+  print_name:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - run: echo $NAME
+  save_hello_world_output:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - run: echo "hello world" > ~/output.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - output.txt
+  print_output_file:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: cat ~/output.txt
+  print_pipeline:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - print_pipeline_id
+  test_error:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - run: return 1
+      - run:
+          name: on error
+          command: echo "Hello Error!"
+          when: on_fail
+  build:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run: npm i
+      - run: npm run lint
+  test:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run: npm i
+      - run: npm run test
+  analyze:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run: npm audit
+
+workflows:
+  welcome:
+    jobs:
+      - print_hello
+      - print_world:
+          requires:
+            - print_hello
+  # env_var:
+  #   jobs:
+  #     - print_name
+  # sharing_file:
+  #   jobs:
+  #     - save_hello_world_output
+  #     - print_output_file:
+  #         requires:
+  #           - save_hello_world_output
+  # pipeline:
+  #   jobs:
+  #     - print_pipeline
+  # error:
+  #   jobs:
+  #     - test_error
+  # ci_pipeline:
+  #   jobs:
+  #     - build
+  #     - test:
+  #         requires:
+  #           - build
+  #     - analyze:
+  #         requires:
+  #           - test
