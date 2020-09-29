@@ -1,4 +1,5 @@
 version: 2.1
+
 jobs:
   print_hello:
     docker:
@@ -15,9 +16,28 @@ jobs:
       - image: cimg/base:2020.01
     steps:
       - checkout
-      - run:
-          command: echo $NAME
+      - run: echo $NAME
+  save_hello_world_output:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - run: echo "hello world" > ~/output.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - output.txt
+  print_output_file:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: cat ~/output.txt
+
 workflows:
   welcome:
     jobs:
-      - print_name
+      - save_hello_world_output
+      - print_output_file:
+          requires:
+            - save_hello_world_output
