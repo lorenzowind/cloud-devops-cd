@@ -12,14 +12,12 @@ jobs:
       - run: echo "world"
   print_name:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/base:2020.01
     steps:
-      - run: echo $NAME
+      - checkout
+      - run:
+          command: echo $MY_ENV_VAR
 workflows:
   welcome:
     jobs:
-      - print_hello
-      - print_world:
-          requires:
-            - "print_hello"
       - print_name
