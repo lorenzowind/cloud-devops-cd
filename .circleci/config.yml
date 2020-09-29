@@ -52,14 +52,34 @@ jobs:
           name: on error
           command: echo "Hello Error!"
           when: on_fail
-          
+  build:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run: npm i
+      - run: npm run lint
+  test:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run: npm i
+      - run: npm run test
+  analyze:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run: npm audit
+
 workflows:
-  # welcome:
-  #   jobs:
-  #     - print_hello
-  #     - print_world:
-  #         requires:
-  #           - print_hello
+  welcome:
+    jobs:
+      - print_hello
+      - print_world:
+          requires:
+            - print_hello
   # env_var:
   #   jobs:
   #     - print_name
@@ -72,6 +92,15 @@ workflows:
   # pipeline:
   #   jobs:
   #     - print_pipeline
-  error:
-    jobs:
-      - test_error
+  # error:
+  #   jobs:
+  #     - test_error
+  # ci_pipeline:
+  #   jobs:
+  #     - build
+  #     - test:
+  #         requires:
+  #           - build
+  #     - analyze:
+  #         requires:
+  #           - test
