@@ -43,23 +43,35 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - print_pipeline_id
-
+  test_error:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - run: return 1
+      - run:
+          name: on error
+          command: echo "Hello Error!"
+          when: on_fail
+          
 workflows:
-  welcome:
+  # welcome:
+  #   jobs:
+  #     - print_hello
+  #     - print_world:
+  #         requires:
+  #           - print_hello
+  # env_var:
+  #   jobs:
+  #     - print_name
+  # sharing_file:
+  #   jobs:
+  #     - save_hello_world_output
+  #     - print_output_file:
+  #         requires:
+  #           - save_hello_world_output
+  # pipeline:
+  #   jobs:
+  #     - print_pipeline
+  error:
     jobs:
-      - print_hello
-      - print_world:
-          requires:
-            - print_hello
-  env_var:
-    jobs:
-      - print_name
-  sharing_file:
-    jobs:
-      - save_hello_world_output
-      - print_output_file:
-          requires:
-            - save_hello_world_output
-  pipeline:
-    jobs:
-      - print_pipeline
+      - test_error
